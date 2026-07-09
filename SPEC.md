@@ -1,7 +1,7 @@
 # SPEC: Gig-Pricing Calculator
 
 **Gate profile:** standard
-**Designer:** daemon · **Date:** 2026-07-09
+**Designer:** daemon · **Date:** 2026-07-10 · **Status:** v1 final — constants confirmed by Designer
 
 ## Goal
 A single-page web tool that turns daemon's gut pricing process into a
@@ -36,22 +36,18 @@ Deterministic pipeline, applied in this exact order:
 
 1. **Median** of the entered competitor prices (3–5 values accepted).
 2. **Positioning:** base = median × 0.90 — i.e. 10% below median.
-   [PROPOSED: 10%. Veto or confirm.]
 3. **Complexity multiplier** (one tier, chosen by the user; guidance text
    on the form: "consider scope + technical difficulty"):
    - simple ×0.85 · standard ×1.00 · complex ×1.30
-   [PROPOSED multipliers. Veto or confirm.]
    Technical difficulty lives HERE and only here — it is never a
    separate booster (no double counting).
 4. **Rush booster:** if rush is ticked, price × 1.25.
-   [PROPOSED: +25%. Veto or confirm.]
 5. **Charm rounding:** round to the nearest multiple of 5; if the result
    is a multiple of 10, subtract 1 (so outputs end in 5 or 9 — the
    attractive, message-triggering price points).
    Examples: 117 → 115 · 72 → 69 · 61.20 → 59.
-   [PROPOSED rule. Veto or confirm.]
-6. **Floor check:** final = max(charm price, floor).
-   Floor = $50  [SET by daemon, 2026-07-09.]
+6. **Floor check:** final = max(charm price, 50). The floor is $50 —
+   no recommendation ever goes below it.
 
 ## Guardrails
 - **Stack:** Python 3.x + FastAPI serving one HTML page; pytest for
@@ -74,8 +70,9 @@ Each individually checkable by an automated test or a 2-minute manual check.
    Rush unticked changes nothing.
 5. Charm rounding follows the exact rule in the pricing model.
    Tests: 117 → 115 · 72 → 69 · 61.20 → 59.
-6. Final price is never below the floor: with floor $F, any computed
-   price under $F returns exactly $F. Test with a computed price below F.
+6. Final price is never below $50. Test: prices [40, 45, 50], simple,
+   no rush → median 45 → base 40.50 → ×0.85 = 34.43 → charm 35 →
+   floor → returns exactly 50.
 7. The result includes a one-line rationale naming: the median, the
    positioning, the complexity tier, and rush status. Example:
    "Median $80, positioned 10% below, complex ×1.3, rush +25%,
